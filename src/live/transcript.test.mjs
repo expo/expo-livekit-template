@@ -1,38 +1,59 @@
 import assert from 'node:assert/strict';
+import { EventEmitter } from 'node:events';
 import { setImmediate } from 'node:timers/promises';
 import { it } from 'node:test';
-import { ConnectionState, Room, RoomEvent } from 'livekit-client';
-import { DataStream_Chunk, DataStream_Header, DataStream_TextHeader, DataStream_Trailer } from '@livekit/protocol';
+import { ConnectionState, DataStreamError, DataStreamErrorReason, RoomEvent } from 'livekit-client';
 import { listenToTranscript } from './transcript.ts';
 
 function createRoom() {
-  const room = new Room();
-  room.state = ConnectionState.Connected;
-  room.localParticipant.identity = 'caller';
-  const manager = room.incomingDataStreamManager;
-  manager.setConnected(true);
-  function open(id, { topic = 'lk.transcription', sender = 'agent', segment = id, length } = {}) {
-    manager.handleStreamHeader(new DataStream_Header({
-      streamId: id, topic, mimeType: 'text/plain', timestamp: 0n,
-      totalLength: length === undefined ? undefined : BigInt(length),
-      attributes: { 'lk.segment_id': segment },
-      contentHeader: { case: 'textHeader', value: new DataStream_TextHeader({}) },
-    }), sender, 0);
-    let index = 0n;
-    return {
+  const handlers = new Map();
+  const streams = new Set();
+  const room = Object.assign(new EventEmitter(), {
+    state: ConnectionState.Connected,
+    localParticipant: { identity: 'caller' },
+    registerTextStreamHandler(topic, handler) {
+      if (handlers.has(topic)) throw new Error('Handler already registered');
+      handlers.set(topic, handler);
+    },
+    unregisterTextStreamHandler(topic) { handlers.delete(topic); },
+  });
+  function open(id, { topic = 'lk.transcription', sender = 'agent', segment = id } = {}) {
+    let controller;
+    let closed = false;
+    const stream = new ReadableStream({
+      start(value) { controller = value; },
+      cancel() { closed = true; },
+    });
+    const reader = {
+      info: { id, topic, attributes: { 'lk.segment_id': segment } },
+      withAbortSignal(signal) { return stream.pipeThrough(new TransformStream(), { signal }); },
+    };
+    void handlers.get(topic)?.(reader, { identity: sender });
+    const incoming = {
+      stream,
       async write(text) {
-        manager.handleStreamChunk(new DataStream_Chunk({
-          streamId: id, chunkIndex: index++, content: new TextEncoder().encode(text),
-        }), 0);
+        if (!closed) controller.enqueue(text);
         await setImmediate();
       },
       async end() {
-        manager.handleStreamTrailer(new DataStream_Trailer({ streamId: id }), 0);
+        if (!closed) controller.close();
+        closed = true;
         await setImmediate();
       },
+      fail(error) {
+        if (!closed) controller.error(error);
+        closed = true;
+      },
     };
+    streams.add(incoming);
+    return incoming;
   }
-  return { room, manager, open };
+  function disconnect() {
+    for (const stream of streams) stream.fail(new DataStreamError('Room disconnected', DataStreamErrorReason.AbnormalEnd));
+    room.state = ConnectionState.Disconnected;
+    room.emit(RoomEvent.Disconnected);
+  }
+  return { room, handlers, open, disconnect };
 }
 
 it('streams speech and chat in arrival order, replacing revised speech segments', async () => {
@@ -62,7 +83,7 @@ it('streams speech and chat in arrival order, replacing revised speech segments'
 });
 
 it('keeps partial text on End and starts a fresh transcript in the same room', async () => {
-  const { room, manager, open } = createRoom();
+  const { room, open, disconnect } = createRoom();
   let entries;
   const update = (value) => { entries = value; };
   const stop = listenToTranscript(room, update);
@@ -70,8 +91,8 @@ it('keeps partial text on End and starts a fresh transcript in the same room', a
   await interrupted.write('Partial');
   const snapshot = entries;
   stop();
-  manager.clearControllers();
-  room.emit(RoomEvent.Disconnected);
+  disconnect();
+  room.state = ConnectionState.Connected;
   const endNext = listenToTranscript(room, update);
   stop();
   await open('new').write('Fresh');
@@ -81,23 +102,16 @@ it('keeps partial text on End and starts a fresh transcript in the same room', a
 });
 
 it('releases pending reads when the room disconnects during a transcript', async (t) => {
-  const { room, manager, open } = createRoom();
+  const { room, open, disconnect } = createRoom();
   let entries;
   listenToTranscript(room, (value) => { entries = value; });
-  const handler = manager.textStreamHandlers.get('lk.transcription');
-  let reader;
-  manager.textStreamHandlers.set('lk.transcription', (value, sender) => {
-    reader = value;
-    return handler(value, sender);
-  });
   const warning = t.mock.method(console, 'warn', () => {});
-  await open('old').write('Partial');
-  assert.equal(reader.reader.locked, true);
-  manager.clearControllers();
-  room.state = ConnectionState.Disconnected;
-  room.emit(RoomEvent.Disconnected);
+  const incoming = open('old');
+  await incoming.write('Partial');
+  assert.equal(incoming.stream.locked, true);
+  disconnect();
   await setImmediate();
-  assert.equal(reader.reader.locked, false);
+  assert.equal(incoming.stream.locked, false);
   assert.equal(entries[0].text, 'Partial');
   assert.equal(warning.mock.callCount(), 0);
 });
@@ -107,9 +121,10 @@ it('reports a broken active stream and can receive the next one', async (t) => {
   let entries;
   const warning = t.mock.method(console, 'warn', () => {});
   const stop = listenToTranscript(room, (value) => { entries = value; });
-  const broken = open('broken', { length: 100 });
+  const broken = open('broken');
   await broken.write('Short');
-  await broken.end();
+  broken.fail(new DataStreamError('Incomplete stream', DataStreamErrorReason.Incomplete));
+  await setImmediate();
   assert.equal(warning.mock.calls[0].arguments[1].reasonName, 'Incomplete');
   await open('next').write('Next');
   assert.deepEqual(entries.map(({ text }) => text), ['Short', 'Next']);
@@ -117,10 +132,10 @@ it('reports a broken active stream and can receive the next one', async (t) => {
 });
 
 it('releases only its own handlers if another consumer already owns chat', () => {
-  const { room, manager } = createRoom();
+  const { room, handlers } = createRoom();
   const chat = () => {};
   room.registerTextStreamHandler('lk.chat', chat);
   assert.throws(() => listenToTranscript(room, () => {}));
-  assert.equal(manager.textStreamHandlers.has('lk.transcription'), false);
-  assert.equal(manager.textStreamHandlers.get('lk.chat'), chat);
+  assert.equal(handlers.has('lk.transcription'), false);
+  assert.equal(handlers.get('lk.chat'), chat);
 });
