@@ -6,6 +6,6 @@ Keep the Expo GPT Live controls, layout, settings and transcript sheet. Only the
 
 Request credentials only on Start. End, Cancel and unmount must release media before reconnecting. Preserve connection and session timeouts; lock voice selection during calls. Keep credentials in `server/.env.local`. The public LAN token is for development only. Keep the transport fixture separate from live AI.
 
-Run `npm run check`. For native changes, test on a simulator: start, mute, open settings and transcript, press X during a reply, then reconnect. Verify the partial transcript remains and the microphone stops. Check the pinned LiveKit client shutdown patch when upgrading the SDK.
+Run `npm run check`. For native changes, test on a simulator: start, mute, open settings and transcript, press X during a reply, then reconnect. Verify the partial transcript remains and the microphone stops.
 
 Use single-line lowercase commits without prefixes or co-author credits. Use area-prefixed PR titles.

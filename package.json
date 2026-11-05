@@ -40,7 +40,6 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "postinstall": "node scripts/patch-livekit-client.mjs",
     "start": "expo start --dev-client --port 8088",
     "android": "expo run:android --port 8088",
     "ios": "expo run:ios --port 8088",
