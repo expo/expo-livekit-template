@@ -1,14 +1,21 @@
 {
   "expo": {
-    "name": "expo-livekit-template",
+    "name": "LiveKit Voice",
     "slug": "expo-livekit-template",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "expolivekittemplate",
-    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "scheme": "expolivekit",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/ExpoLiveKitIcon.icon",
+      "bundleIdentifier": "dev.davidmokos.expolivekit",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,26 +24,30 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "server",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "package": "dev.davidmokos.expolivekit"
     },
     "plugins": [
       "expo-router",
+      "@livekit/react-native-expo-plugin",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "microphonePermission": "Talk with your LiveKit voice assistant.",
+          "cameraPermission": "Share video with your LiveKit assistant."
+        }
+      ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#080b0c",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 64
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
+      "typedRoutes": true
     }
   }
 }

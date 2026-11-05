@@ -1,0 +1,48 @@
+{
+  "repository": "https://github.com/livekit/components-js",
+  "commit": "9cfeb0c492669401242ebcd7828a7dc832b1ae59",
+  "files": [
+    {
+      "file": "agent-audio-visualizer-aura.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/agent-audio-visualizer-aura.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/agent-audio-visualizer-aura.tsx",
+      "sha256": "5a0126663ca8ae9b6ee0a7ac70cf85260b34ae66bbf7f402eea8694a5fedc7b1"
+    },
+    {
+      "file": "agent-audio-visualizer-grid.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/agent-audio-visualizer-grid.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/agent-audio-visualizer-grid.tsx",
+      "sha256": "9e24ab7ee3d31d5c86a00163e371a435b1a65e90103a557ff5a20b347f79310c"
+    },
+    {
+      "file": "agent-audio-visualizer-bar.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/agent-audio-visualizer-bar.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/agent-audio-visualizer-bar.tsx",
+      "sha256": "77bef3b4ba84412b0ad6800b59769bc5aea14debe9009fd17638fb99e618cdf5"
+    },
+    {
+      "file": "react-shader-toy.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/react-shader-toy.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/react-shader-toy.tsx",
+      "sha256": "eb8efb252e7908e2e24e4a22bc8f1e61fe1618b229d528b1347d378adf1da16f"
+    },
+    {
+      "file": "use-agent-audio-visualizer-aura.ts",
+      "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-aura.ts",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-aura.ts",
+      "sha256": "664e87be6523b6600bd67d7d747a454430bdefc56214f29d61b233f8ab809061"
+    },
+    {
+      "file": "use-agent-audio-visualizer-grid.ts",
+      "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-grid.ts",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-grid.ts",
+      "sha256": "3078bb07f6dde2e77fc9497a9a35cb3b1db55f05850ca8a354e85b0215a0c10b"
+    },
+    {
+      "file": "use-agent-audio-visualizer-bar.ts",
+      "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-bar.ts",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-bar.ts",
+      "sha256": "634ccbee073652a8ef13714d7d7e1db56649c61a4395c9eca9cc79cb74b2e5e2"
+    }
+  ]
+}
