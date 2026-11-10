@@ -60,5 +60,4 @@ cli.runApp(new ServerOptions({
   agentName: isFixtureWorker ? FIXTURE_AGENT_NAME : AGENT_NAME,
   port: Number(process.env.AGENT_PORT ?? (isFixtureWorker ? 8083 : 8082)),
   numIdleProcesses: 1,
-  ...(process.argv.includes('dev') ? { loadFunc: async () => 0 } : {}),
 }));

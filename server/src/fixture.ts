@@ -13,7 +13,7 @@ export async function runTransportFixture(ctx: JobContext) {
   const options = new TrackPublishOptions();
   options.source = TrackSource.SOURCE_MICROPHONE;
   await local.publishTrack(track, options);
-  await local.setAttributes({ 'lk.agent.state': 'listening', 'expo.mode': 'fixture' });
+  await local.setAttributes({ 'lk.agent.state': 'listening' });
   let closed = false;
   let chain = Promise.resolve();
   const deadline = setTimeout(() => ctx.shutdown('session time limit'), SESSION_LIMIT_MS);

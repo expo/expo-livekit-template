@@ -9,7 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "icon": "./assets/ExpoLiveKitIcon.icon",
-      "bundleIdentifier": "dev.davidmokos.expolivekit",
+      "bundleIdentifier": "com.example.expolivekit",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": [
@@ -18,14 +18,7 @@
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "package": "dev.davidmokos.expolivekit"
+      "package": "com.example.expolivekit"
     },
     "plugins": [
       "expo-router",
@@ -33,16 +26,13 @@
       [
         "@config-plugins/react-native-webrtc",
         {
-          "microphonePermission": "Talk with your LiveKit voice assistant.",
-          "cameraPermission": "Share video with your LiveKit assistant."
+          "microphonePermission": "Talk with your LiveKit voice assistant."
         }
       ],
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#080b0c",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 64
+          "backgroundColor": "#080b0c"
         }
       ]
     ],

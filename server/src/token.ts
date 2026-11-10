@@ -8,7 +8,6 @@ export async function createSessionToken(request: SessionRequest, config: { url:
     identity: `user-${randomUUID()}`,
     name: 'You',
     ttl: '10m',
-    metadata: JSON.stringify({ mode: request.mode }),
   });
   token.addGrant({ room: roomName, roomJoin: true, canPublish: true, canPublishSources: [TrackSource.MICROPHONE], canSubscribe: true, canPublishData: true, canUpdateOwnMetadata: false });
   token.roomConfig = new RoomConfiguration({
@@ -16,7 +15,6 @@ export async function createSessionToken(request: SessionRequest, config: { url:
     emptyTimeout: 30,
     departureTimeout: 10,
     maxParticipants: 2,
-    metadata: JSON.stringify(request),
     agents: [new RoomAgentDispatch({
       agentName: request.mode === 'fixture' ? FIXTURE_AGENT_NAME : AGENT_NAME,
       metadata: JSON.stringify(request),
