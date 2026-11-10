@@ -1,6 +1,6 @@
 # Agent and token API
 
-The [app quickstart](../README.md) runs the API and worker on your Mac and connects them to LiveKit Cloud. Cloud Inference supplies the realtime voice model. The weather tool uses [Open-Meteo](https://open-meteo.com/en/docs). Add `OPENAI_API_KEY` to `server/.env.local` and restart the worker to enable web search. `OPENAI_SEARCH_MODEL` defaults to `gpt-4.1-mini`.
+The [app quickstart](../README.md) runs the API and worker on your Mac and connects them to LiveKit Cloud. Cloud Inference supplies the realtime voice model. Customize the assistant in `src/assistant.ts`.
 
 ## Local LiveKit
 
@@ -30,11 +30,9 @@ Run these commands from `server/`.
 
 | Command | Checks |
 | --- | --- |
-| `npm run check` and `npm test` | Types, token permissions, HTTP handling and tools |
+| `npm run check` and `npm test` | Types, token permissions and HTTP handling |
 | `npm run smoke` | Local fixture connection, text and audio |
 | `npm run smoke:live` | Live room, spoken greeting and typed arithmetic question |
 | `npm run smoke:audio` | Synthesized microphone question and spoken answer on macOS |
-| `npm run test:live` | Cloud Inference weather lookup and provider failure handling |
-| `npm run test:search` | Cloud Inference and OpenAI web search with source URLs |
 
 Live checks use the configured providers and incur normal usage charges.

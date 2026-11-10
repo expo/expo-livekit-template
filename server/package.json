@@ -12,18 +12,14 @@
     "test": "tsx --test tests/*.test.ts",
     "smoke": "tsx tests/transport-smoke.ts",
     "smoke:live": "SMOKE_MODE=live tsx tests/transport-smoke.ts",
-    "test:live": "tsx --test --test-force-exit --test-name-pattern=weather tests/agent-live.ts",
-    "smoke:audio": "tsx tests/audio-input-smoke.ts",
-    "test:search": "tsx --test --test-force-exit --test-name-pattern=search tests/agent-live.ts"
+    "smoke:audio": "tsx tests/audio-input-smoke.ts"
   },
   "dependencies": {
     "@livekit/agents": "1.9.5",
     "@livekit/agents-plugin-openai": "1.9.5",
     "@livekit/rtc-node": "1.2.1",
     "dotenv": "18.0.9",
-    "livekit-server-sdk": "2.19.2",
-    "openai": "7.50.0",
-    "zod": "4.6.7"
+    "livekit-server-sdk": "2.19.2"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
