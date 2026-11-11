@@ -32,12 +32,17 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#080b0c"
+          "backgroundColor": "#000000"
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "backgroundColor": "#000000",
+    "web": {
+      "output": "server",
+      "favicon": "./assets/icon.png"
     }
   }
 }

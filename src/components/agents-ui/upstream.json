@@ -43,6 +43,30 @@
       "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-bar.ts",
       "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-bar.ts",
       "sha256": "634ccbee073652a8ef13714d7d7e1db56649c61a4395c9eca9cc79cb74b2e5e2"
+    },
+    {
+      "file": "agent-audio-visualizer-radial.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/agent-audio-visualizer-radial.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/agent-audio-visualizer-radial.tsx",
+      "sha256": "d3bcf70a1fb83d7c5c1848a65e5e5bf6de36d29c010ee9e411e28ca1baecb9ad"
+    },
+    {
+      "file": "agent-audio-visualizer-wave.tsx",
+      "upstreamPath": "packages/shadcn/components/agents-ui/agent-audio-visualizer-wave.tsx",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/components/agents-ui/agent-audio-visualizer-wave.tsx",
+      "sha256": "daf1fa9df5d42c588ed32595c1a9e3a4d733f0ed47c265ec833d0edc2d857087"
+    },
+    {
+      "file": "use-agent-audio-visualizer-radial.ts",
+      "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-radial.ts",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-radial.ts",
+      "sha256": "d60888c2c7ef144fb93517b90030588d41ab3078eb3524e3d1ffccaa332b4129"
+    },
+    {
+      "file": "use-agent-audio-visualizer-wave.ts",
+      "upstreamPath": "packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-wave.ts",
+      "url": "https://raw.githubusercontent.com/livekit/components-js/9cfeb0c492669401242ebcd7828a7dc832b1ae59/packages/shadcn/hooks/agents-ui/use-agent-audio-visualizer-wave.ts",
+      "sha256": "db83bd092ec88bc4c3fb84416e6cb97839bebe8d44082699032e2be191de0b65"
     }
   ]
 }

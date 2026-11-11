@@ -1,0 +1,91 @@
+import { useState, useEffect, useCallback } from 'react';
+import {
+  type ValueAnimationTransition,
+  animate,
+  useMotionValue,
+  useMotionValueEvent,
+} from 'motion/react';
+import type { AgentState } from '@livekit/components-react';
+
+const DEFAULT_SPEED = 5;
+const SPEED: Partial<Record<AgentState, number>> = {
+  disconnected: DEFAULT_SPEED,
+  listening: DEFAULT_SPEED,
+  thinking: DEFAULT_SPEED * 4,
+  connecting: DEFAULT_SPEED * 4,
+  initializing: DEFAULT_SPEED * 4,
+};
+const DEFAULT_AMPLITUDE = 0.025;
+const DEFAULT_FREQUENCY = 10;
+const DEFAULT_TRANSITION: ValueAnimationTransition = { duration: 0.2, ease: 'easeOut' };
+
+function useAnimatedValue<T>(initialValue: T) {
+  const [value, setValue] = useState(initialValue);
+  const motionValue = useMotionValue(initialValue);
+  useMotionValueEvent(motionValue, 'change', (value) => setValue(value as T));
+
+  const animateFn = useCallback(
+    (targetValue: T | T[], transition: ValueAnimationTransition) => {
+      animate(motionValue, targetValue, transition);
+    },
+    [motionValue],
+  );
+
+  return { value, animate: animateFn };
+}
+
+export function useAgentAudioVisualizerWave(state: AgentState, volume: number) {
+  const { value: amplitude, animate: animateAmplitude } = useAnimatedValue(DEFAULT_AMPLITUDE);
+  const { value: frequency, animate: animateFrequency } = useAnimatedValue(DEFAULT_FREQUENCY);
+  const { value: opacity, animate: animateOpacity } = useAnimatedValue(1.0);
+
+  useEffect(() => {
+    switch (state) {
+      case 'disconnected':
+        animateAmplitude(0, DEFAULT_TRANSITION);
+        animateFrequency(0, DEFAULT_TRANSITION);
+        animateOpacity(1.0, DEFAULT_TRANSITION);
+        return;
+      case 'listening':
+        animateAmplitude(DEFAULT_AMPLITUDE, DEFAULT_TRANSITION);
+        animateFrequency(DEFAULT_FREQUENCY, DEFAULT_TRANSITION);
+        animateOpacity([1.0, 0.3], {
+          duration: 0.75,
+          repeat: Infinity,
+          repeatType: 'mirror',
+        });
+        return;
+      case 'thinking':
+      case 'connecting':
+      case 'initializing':
+        animateAmplitude(DEFAULT_AMPLITUDE / 4, DEFAULT_TRANSITION);
+        animateFrequency(DEFAULT_FREQUENCY * 4, DEFAULT_TRANSITION);
+        animateOpacity([1.0, 0.3], {
+          duration: 0.4,
+          repeat: Infinity,
+          repeatType: 'mirror',
+        });
+        return;
+      case 'speaking':
+      default:
+        animateAmplitude(DEFAULT_AMPLITUDE, DEFAULT_TRANSITION);
+        animateFrequency(DEFAULT_FREQUENCY, DEFAULT_TRANSITION);
+        animateOpacity(1.0, DEFAULT_TRANSITION);
+        return;
+    }
+  }, [state, animateAmplitude, animateFrequency, animateOpacity]);
+
+  useEffect(() => {
+    if (state === 'speaking') {
+      animateAmplitude(0.015 + 0.4 * volume, { duration: 0 });
+      animateFrequency(20 + 60 * volume, { duration: 0 });
+    }
+  }, [state, volume, animateAmplitude, animateFrequency]);
+
+  return {
+    speed: SPEED[state] ?? DEFAULT_SPEED * 2,
+    amplitude,
+    frequency,
+    opacity,
+  };
+}

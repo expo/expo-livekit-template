@@ -1,57 +1,54 @@
 import type { AgentState, TrackReference } from '@livekit/components-react';
-import { memo } from 'react';
 import { useMultibandTrackVolume, useTrackVolume } from '@livekit/react-native';
 import { View } from 'react-native';
 
-import AgentVisualizer from './agent-visualizer';
+import AgentAudioVisualizer from './agents-ui/agent-audio-visualizer';
 
-export const VISUALIZER_VARIANTS = [
-  { id: 'aura', label: 'Aura', description: 'A ring of light' },
-  { id: 'grid', label: 'Grid', description: 'A field of light' },
-  { id: 'bars', label: 'Bars', description: 'Sound in motion' },
-] as const;
-export type VisualizerVariant = (typeof VISUALIZER_VARIANTS)[number]['id'];
-export function isVisualizerVariant(value: unknown): value is VisualizerVariant {
-  return VISUALIZER_VARIANTS.some((variant) => variant.id === value);
-}
+export const VISUALIZERS = ['aura', 'wave', 'bar', 'grid', 'radial'] as const;
+export type VisualizerVariant = (typeof VISUALIZERS)[number];
 
-const EMPTY_BANDS: number[] = [];
+// Aura and Wave follow the overall volume. The other styles follow frequency bands.
+const BANDS: Partial<Record<VisualizerVariant, number>> = { bar: 5, grid: 15, radial: 24 };
+const SILENCE: number[] = [];
 
-export const Visualizer = memo(function Visualizer({ variant, state, size, track }: {
+/** Measures the agent's audio natively and passes the levels to a LiveKit visualizer. */
+export function Visualizer({ variant, state, track, size }: {
   variant: VisualizerVariant;
   state: AgentState;
-  size: number;
   track?: TrackReference;
+  size: number;
 }) {
-  const volume = useTrackVolume(variant === 'aura' ? track : undefined);
-  const volumeBands = useMultibandTrackVolume(variant === 'aura' ? undefined : track, {
-    bands: variant === 'grid' ? 15 : 5,
+  const bands = BANDS[variant];
+  const volume = useTrackVolume(bands ? undefined : track);
+  const volumeBands = useMultibandTrackVolume(bands ? track : undefined, {
+    bands,
     minFrequency: 100,
     maxFrequency: 8000,
     updateInterval: 80,
   });
+  const box = { width: size, height: size };
 
   return (
     <View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
+      style={box}
     >
-      <AgentVisualizer
+      <AgentAudioVisualizer
         variant={variant}
         state={state}
-        volume={track ? volume : 0}
-        volumeBands={track ? volumeBands : EMPTY_BANDS}
-        size={size}
+        volume={track && !bands ? volume : 0}
+        volumeBands={track && bands ? volumeBands : SILENCE}
         dom={{
-          useExpoDOMWebView: false,
+          // Each platform needs a different WebView. On iOS, Expo's DOM WebView rejects the first
+          // prop update. On Android, react-native-webview loads the props too late.
+          useExpoDOMWebView: process.env.EXPO_OS === 'android',
           scrollEnabled: false,
-          style: { width: size, height: size, backgroundColor: 'transparent' },
-          containerStyle: { width: size, height: size },
-          contentInsetAdjustmentBehavior: 'never',
+          style: { ...box, backgroundColor: 'transparent' },
+          containerStyle: box,
         }}
       />
     </View>
   );
-});
+}

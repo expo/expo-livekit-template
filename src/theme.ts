@@ -1,8 +1,7 @@
 export const theme = {
   background: '#000000',
-  surface: '#202020',
-  text: '#F5F5F5',
-  secondary: '#A1A1A6',
-  accent: '#C4F3E5',
-  danger: '#F0A5A8',
+  surface: '#1C1C1E',
+  text: '#F5F5F7',
+  secondary: '#8E8E93',
+  danger: '#FF453A',
 } as const;

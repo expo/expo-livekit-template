@@ -1,165 +1,120 @@
-import * as Haptics from 'expo-haptics';
+import type { AgentState } from '@livekit/components-react';
 import { useState } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import Animated, { Easing, FadeIn, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Visualizer } from '@/components/visualizer';
-import { TranscriptSheet } from '@/components/transcript-sheet';
-import { VoiceControl } from '@/components/voice-control';
-import { VoiceSettings } from '@/components/voice-settings';
-import { usePreferences } from '@/hooks/use-preferences';
-import { useVoiceSession } from '@/live/use-voice-session';
+import { Button } from '@/components/button';
+import { Segmented } from '@/components/segmented';
+import { Transcript } from '@/components/transcript';
+import { VISUALIZERS, Visualizer, type VisualizerVariant } from '@/components/visualizer';
+import { useVoiceSession } from '@/hooks/use-voice-session';
 import { theme } from '@/theme';
 
-export default function VoiceScreen() {
-  const { preferences, update, storageError, ready } = usePreferences();
-  const session = useVoiceSession(preferences);
-  const voice = preferences.voice;
-  const variant = preferences.visualizer;
-  const [sheet, setSheet] = useState<'settings' | 'transcript' | null>(null);
-  const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
-  const connected = session.phase === 'connected';
-  const connecting = session.phase === 'connecting';
-  const disconnecting = session.phase === 'ending';
-  const voiceLocked = session.phase !== 'idle';
-  const personaSize = Math.min(width * 0.62, height * 0.34, 280);
-  const visualizerState = connecting
-    ? 'connecting'
-    : disconnecting
-      ? 'thinking'
-      : connected
-        ? session.agent.state
-        : 'disconnected';
-  const status = connecting
-    ? 'Connecting'
-    : disconnecting
-      ? 'Ending conversation'
-      : connected
-        ? session.muted
-          ? 'Microphone muted'
-          : 'Conversation active'
-        : 'Ready to start a conversation';
+const ICONS = {
+  start: { ios: 'waveform', android: 'graphic_eq' },
+  mic: { ios: 'mic.fill', android: 'mic' },
+  muted: { ios: 'mic.slash.fill', android: 'mic_off' },
+  end: { ios: 'xmark', android: 'close' },
+} as const;
 
-  const onPrimaryPress = () => {
-    if (disconnecting || !ready) return;
-    if (process.env.EXPO_OS === 'ios') void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (connected || connecting) void session.end();
-    else void session.start();
-  };
+const STATUS: Partial<Record<AgentState, string>> = {
+  connecting: 'Connecting',
+  initializing: 'Connecting',
+  'pre-connect-buffering': 'Listening',
+  idle: 'Listening',
+  listening: 'Listening',
+  thinking: 'Thinking',
+  speaking: 'Speaking',
+};
+
+// The visualizer glides between the screen center and the top when a conversation starts or ends.
+const glide = LinearTransition.duration(450).easing(Easing.bezier(0.77, 0, 0.175, 1));
+
+export default function VoiceScreen() {
+  const voice = useVoiceSession();
+  const [variant, setVariant] = useState<VisualizerVariant>('aura');
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
 
   return (
-    <View style={styles.screen}>
-      <View accessible accessibilityLabel={status} style={styles.center}>
-        <Visualizer
-          variant={variant}
-          state={visualizerState}
-          size={personaSize}
-          track={connected ? session.agent.microphoneTrack : undefined}
-        />
-      </View>
-      <View style={[styles.toolbar, { top: insets.top + 12 }]}>
-        <VoiceControl
-          icon="captions"
-          label="Show transcript"
-          testID="transcript-button"
-          onPress={() => setSheet('transcript')}
-          size={48}
-        />
-        <VoiceControl
-          icon="settings"
-          label="Voice and appearance settings"
-          testID="voice-settings-button"
-          onPress={() => setSheet('settings')}
-          size={48}
-        />
-      </View>
-      <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 20) + 14 }]}>
-        {(session.error || storageError) && (
-          <Text accessibilityRole="alert" style={styles.error}>
-            {session.error || storageError}
+    <View
+      style={[styles.screen, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12 }]}
+    >
+      <Segmented options={VISUALIZERS} value={variant} onChange={setVariant} />
+
+      <View style={styles.stage}>
+        <Animated.View layout={glide} style={styles.center}>
+          <Visualizer
+            variant={variant}
+            state={voice.state}
+            track={voice.agentTrack}
+            size={Math.min(width * 0.8, 320)}
+          />
+          <Text style={styles.status}>
+            {voice.muted && voice.state === 'listening' ? 'Muted' : STATUS[voice.state]}
           </Text>
-        )}
-        <View style={styles.controls}>
-          <VoiceControl
-            icon={session.muted ? 'mic-off' : 'mic'}
-            label={session.muted ? 'Unmute microphone' : 'Mute microphone'}
-            testID="session-mute-button"
-            disabled={!connected}
-            selected={session.muted}
-            size={60}
-            onPress={() => {
-              if (process.env.EXPO_OS === 'ios') void Haptics.selectionAsync();
-              void session.toggleMute();
-            }}
-          />
-          <VoiceControl
-            icon={connected || connecting ? 'close' : 'waveform'}
-            label={
-              disconnecting
-                ? 'Ending conversation'
-                : connecting
-                  ? 'Cancel connection'
-                  : connected
-                    ? 'End conversation'
-                    : session.error
-                      ? 'Retry conversation'
-                      : 'Start conversation'
-            }
-            testID="session-primary-button"
-            prominent
-            size={64}
-            loading={connecting || disconnecting}
-            disabled={disconnecting || !ready}
-            onPress={onPrimaryPress}
-          />
-        </View>
+        </Animated.View>
       </View>
-      <VoiceSettings
-        isPresented={sheet === 'settings'}
-        onDismiss={() => setSheet(null)}
-        voice={voice}
-        onVoiceChange={(next) => update({ voice: next })}
-        voiceEnabled={ready && !voiceLocked}
-        voiceLocked={voiceLocked}
-        persona={variant}
-        onPersonaChange={(next) => update({ visualizer: next })}
-        personaEnabled={ready}
-      />
-      <TranscriptSheet
-        isPresented={sheet === 'transcript'}
-        onDismiss={() => setSheet(null)}
-        entries={session.messages}
-      />
+
+      {voice.active && <Transcript messages={voice.messages} />}
+
+      {voice.error && (
+        <Text selectable accessibilityRole="alert" style={styles.error}>
+          {voice.error}
+        </Text>
+      )}
+
+      <Animated.View
+        key={String(voice.active)}
+        entering={FadeIn.duration(200)}
+        style={styles.controls}
+      >
+        {voice.active ? (
+          <>
+            <Button
+              icon={voice.muted ? ICONS.muted : ICONS.mic}
+              label={voice.muted ? 'Unmute microphone' : 'Mute microphone'}
+              onPress={voice.toggleMute}
+              disabled={!voice.connected}
+              color={voice.muted ? theme.background : theme.text}
+              background={voice.muted ? theme.text : theme.surface}
+            />
+            <Button
+              icon={ICONS.end}
+              label="End conversation"
+              onPress={voice.end}
+              disabled={!voice.connected}
+              background={theme.danger}
+            />
+          </>
+        ) : (
+          <Button
+            icon={ICONS.start}
+            label="Start conversation"
+            title="Start conversation"
+            onPress={voice.start}
+            color={theme.background}
+            background={theme.text}
+          />
+        )}
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.background },
-  center: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toolbar: {
-    position: 'absolute',
-    left: 22,
-    right: 22,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bottom: { position: 'absolute', bottom: 0, left: 24, right: 24, gap: 22 },
-  controls: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 12 },
+  stage: { flex: 3, alignItems: 'center', justifyContent: 'center' },
+  center: { alignItems: 'center' },
+  status: { color: theme.secondary, fontSize: 15, fontWeight: '500', height: 20 },
   error: {
     color: theme.danger,
+    fontSize: 15,
+    lineHeight: 21,
     textAlign: 'center',
-    fontSize: 14,
-    lineHeight: 20,
-    paddingHorizontal: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
+  controls: { flexDirection: 'row', justifyContent: 'center', gap: 16, paddingTop: 12 },
 });

@@ -10,24 +10,24 @@ const vertices = new Float32Array([1, 1, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0]);
 
 function createProgram(gl: WebGLRenderingContext, fragmentSource: string) {
   const program = gl.createProgram();
-  if (!program) throw new Error('Could not create the Aura shader program.');
+  if (!program) throw new Error('Could not create the shader program.');
 
   const shaders = [];
   try {
     for (const [type, source] of [[gl.VERTEX_SHADER, vertexSource], [gl.FRAGMENT_SHADER, fragmentSource]] as const) {
       const shader = gl.createShader(type);
-      if (!shader) throw new Error('Could not create the Aura shader.');
+      if (!shader) throw new Error('Could not create the shader.');
       shaders.push(shader);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        throw new Error(gl.getShaderInfoLog(shader) || 'Could not compile the Aura shader.');
+        throw new Error(gl.getShaderInfoLog(shader) || 'Could not compile the shader.');
       }
       gl.attachShader(program, shader);
     }
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error(gl.getProgramInfoLog(program) || 'Could not link the Aura shader.');
+      throw new Error(gl.getProgramInfoLog(program) || 'Could not link the shader.');
     }
     return program;
   } catch (error) {
@@ -55,7 +55,7 @@ export function ReactShaderToy({ source, uniforms }: {
       const gl = canvas.getContext('webgl') ??
         canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
       if (!gl) {
-        console.error('WebGL is unavailable for the Aura visualizer.');
+        console.error('WebGL is unavailable for the visualizer.');
         return;
       }
 
@@ -88,7 +88,7 @@ export function ReactShaderToy({ source, uniforms }: {
         program = createProgram(gl, source);
         gl.useProgram(program);
         buffer = gl.createBuffer();
-        if (!buffer) throw new Error('Could not create the Aura vertex buffer.');
+        if (!buffer) throw new Error('Could not create the vertex buffer.');
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         const position = gl.getAttribLocation(program, 'aVertexPosition');
@@ -135,7 +135,7 @@ export function ReactShaderToy({ source, uniforms }: {
       } catch (error) {
         release();
         release = undefined;
-        console.error('Aura shader error:', error);
+        console.error('Visualizer shader error:', error);
       }
     });
     return () => {
