@@ -44,6 +44,27 @@ npm run ios
 
 For Android, use `npm run android`. The app needs a development build because Expo Go does not include WebRTC.
 
+## Ship a release build
+
+In development, the app fetches tokens from the Expo dev server. A release build has no dev server, so deploy the token route and tell the app where it is.
+
+1. Deploy the API route to [EAS Hosting](https://docs.expo.dev/eas/hosting/get-started/). `eas deploy` uploads the variables in `.env.local` with the route.
+
+   ```sh
+   npx expo export --platform web
+   npx eas-cli deploy --prod
+   ```
+
+2. Set the deployed URL as the `origin` of the `expo-router` plugin in `app.json`, then build again:
+
+   ```json
+   ["expo-router", { "origin": "https://your-app.expo.app" }]
+   ```
+
+To test a release build on a device before you deploy, set `origin` to the dev server's LAN address instead, for example `http://192.168.1.20:8081`.
+
+The token route issues a token to anyone who calls it. Add authentication in `src/app/token+api.ts` before you ship.
+
 ## Visualizers
 
 The app shows all five audio visualizers from [LiveKit Agents UI](https://livekit.com/products/agents-ui). Change the style with the control at the top of the screen, also during a conversation.
@@ -58,6 +79,7 @@ The visualizers are web components. They run in an [Expo DOM component](https://
 src/
   app/
     _layout.tsx             Registers the LiveKit WebRTC globals
+    _layout.web.tsx         Web layout. The web build only serves the token route.
     index.tsx               The screen
     token+api.ts            Token endpoint. It runs on the server.
   hooks/
