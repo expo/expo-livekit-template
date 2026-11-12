@@ -70,9 +70,9 @@ export function useVoiceSession() {
     } catch (cause) {
       // An abort means the user ended the conversation before the agent joined.
       if (!controller.signal.aborted) {
-        // On iOS, a denied microphone arrives as a SecurityError that is not an Error object.
-        const { name, message } = (cause ?? {}) as { name?: string; message?: string };
-        setError(name === 'SecurityError' ? MICROPHONE_DENIED : (message ?? String(cause)));
+        // WebRTC errors are not always Error objects.
+        const { message } = (cause ?? {}) as { message?: string };
+        setError(message ?? String(cause));
       }
       await session.end();
     } finally {

@@ -17,7 +17,7 @@
 
 - **One screen.** A live visualizer, a streaming transcript, and two controls: mute and end.
 - **One hook.** All LiveKit session code is in [`use-voice-session.ts`](src/hooks/use-voice-session.ts).
-- **One agent.** A [realtime voice agent](agent/agent.ts) in 33 lines.
+- **One agent.** A [realtime voice agent](agent/agent.ts) in 36 lines.
 - **One set of keys.** The model runs on LiveKit Inference. You need no OpenAI key.
 - **No token server to run.** An [Expo Router API route](src/app/token+api.ts) issues LiveKit tokens.
 
@@ -43,27 +43,6 @@ npm run ios
 ```
 
 For Android, use `npm run android`. The app needs a development build because Expo Go does not include WebRTC.
-
-## Ship a release build
-
-In development, the app fetches tokens from the Expo dev server. A release build has no dev server, so deploy the token route and tell the app where it is.
-
-1. Deploy the API route to [EAS Hosting](https://docs.expo.dev/eas/hosting/get-started/). `eas deploy` uploads the variables in `.env.local` with the route.
-
-   ```sh
-   npx expo export --platform web
-   npx eas-cli deploy --prod
-   ```
-
-2. Set the deployed URL as the `origin` of the `expo-router` plugin in `app.json`, then build again:
-
-   ```json
-   ["expo-router", { "origin": "https://your-app.expo.app" }]
-   ```
-
-To test a release build on a device before you deploy, set `origin` to the dev server's LAN address instead, for example `http://192.168.1.20:8081`.
-
-The token route issues a token to anyone who calls it. Add authentication in `src/app/token+api.ts` before you ship.
 
 ## Visualizers
 
@@ -103,8 +82,26 @@ agent/
 
 ## Ship it
 
-- **Token endpoint.** In development, the Expo dev server runs the API route. For a production build, [deploy the route](https://docs.expo.dev/router/web/api-routes/#native-deployment) and add your user authentication to it.
-- **Agent.** Deploy `agent/` to LiveKit Cloud with [`lk agent deploy`](https://docs.livekit.io/agents/ops/deployment/).
+In development, the app fetches tokens from the Expo dev server. A release build has no dev server, so deploy the token route and tell the app where it is.
+
+1. Deploy the API route to [EAS Hosting](https://docs.expo.dev/eas/hosting/get-started/). `eas deploy` uploads the variables in `.env.local` with the route.
+
+   ```sh
+   npx expo export --platform web
+   npx eas-cli deploy --prod
+   ```
+
+2. Set the deployed URL as the `origin` of the `expo-router` plugin in `app.json`, then build again:
+
+   ```json
+   ["expo-router", { "origin": "https://your-app.expo.app" }]
+   ```
+
+To test a release build on an iOS device before you deploy, set `origin` to the dev server's LAN address instead, for example `http://192.168.1.20:8081`. Android release builds block plain HTTP.
+
+The token route issues a token to anyone who calls it. Add authentication in `src/app/token+api.ts` before you ship.
+
+Deploy the agent in `agent/` to LiveKit Cloud with [`lk agent deploy`](https://docs.livekit.io/agents/ops/deployment/).
 
 ## Good to know
 
