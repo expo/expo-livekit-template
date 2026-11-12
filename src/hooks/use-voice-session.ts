@@ -5,9 +5,10 @@ import {
   useTranscriptions,
 } from '@livekit/components-react';
 import { AudioSession } from '@livekit/react-native';
+import { permissions } from '@livekit/react-native-webrtc';
 import { ConnectionState, DisconnectReason, RoomEvent, TokenSource } from 'livekit-client';
 import { useEffect, useRef, useState } from 'react';
-import { LogBox, PermissionsAndroid } from 'react-native';
+import { LogBox } from 'react-native';
 
 // Tokens come from the Expo Router API route in src/app/token+api.ts.
 const tokenSource = TokenSource.endpoint('/token');
@@ -22,6 +23,7 @@ LogBox.ignoreLogs([
 // Android needs an explicit audio session. On iOS, LiveKit configures the session itself.
 const android = process.env.EXPO_OS === 'android';
 const MICROPHONE_DENIED = 'Allow microphone access to talk to the agent.';
+const NO_TOKEN_SERVER = 'No token server. Set the expo-router origin in app.json. See the README.';
 
 /** One spoken message in the transcript. */
 export type Message = { id: string; fromUser: boolean; text: string };
@@ -58,20 +60,19 @@ export function useVoiceSession() {
     setStarting(true);
     setError(undefined);
     try {
-      if (android) {
-        // The permission dialog stops the connection setup, so ask before the connection starts.
-        const answer = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
-        if (answer !== 'granted') throw new Error(MICROPHONE_DENIED);
-        await AudioSession.startAudioSession();
-      }
+      // Release builds fetch the token from the origin in app.json. Without one, the request has no host.
+      if (!globalThis.window?.location?.origin) throw new Error(NO_TOKEN_SERVER);
+      // Ask before connecting, so the agent does not greet the user behind the permission dialog.
+      if (!(await permissions.request({ name: 'microphone' }))) throw new Error(MICROPHONE_DENIED);
+      if (android) await AudioSession.startAudioSession();
       // Fetches a token, connects, turns the microphone on, and waits for the agent.
       await session.start({ signal: controller.signal });
     } catch (cause) {
       // An abort means the user ended the conversation before the agent joined.
       if (!controller.signal.aborted) {
-        // On iOS, a denied microphone arrives as a SecurityError that is not an Error object.
-        const { name, message } = (cause ?? {}) as { name?: string; message?: string };
-        setError(name === 'SecurityError' ? MICROPHONE_DENIED : (message ?? String(cause)));
+        // WebRTC errors are not always Error objects.
+        const { message } = (cause ?? {}) as { message?: string };
+        setError(message ?? String(cause));
       }
       await session.end();
     } finally {

@@ -1,4 +1,5 @@
 import { Agent, AgentSession, ServerOptions, cli, defineAgent, inference } from '@livekit/agents';
+import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import { fileURLToPath } from 'node:url';
 
 export default defineAgent({
@@ -13,6 +14,8 @@ export default defineAgent({
 
     await session.start({
       room: ctx.room,
+      // Removes background voices and noise, so nearby talk does not reach the model as a user turn.
+      inputOptions: { noiseCancellation: BackgroundVoiceCancellation() },
       agent: new Agent({
         instructions: 'You are a friendly voice assistant. Keep your replies brief and natural.',
       }),
