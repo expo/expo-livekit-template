@@ -10,7 +10,9 @@
     <img src="https://img.shields.io/badge/LiveKit-Agents-000?logo=livekit&logoColor=fff" alt="LiveKit Agents">
     <img src="https://img.shields.io/badge/license-MIT-000" alt="MIT license">
   </p>
-  <img src="assets/demo.gif" alt="A conversation with the agent while the visualizer style changes" width="300">
+
+https://github.com/user-attachments/assets/b5dcf4f1-5b9c-4337-8cb4-780e0f8d91de
+
 </div>
 
 ## What you get

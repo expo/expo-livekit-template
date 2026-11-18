@@ -23,5 +23,5 @@ logs/
 .env.*
 !.env.example
 
-# The full demo video is large. The README uses assets/demo.gif.
+# Demo videos are large. The README video is a GitHub attachment.
 /assets/demo.mp4
