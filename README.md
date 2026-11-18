@@ -103,6 +103,10 @@ The token route issues a token to anyone who calls it. Add authentication in `sr
 
 Deploy the agent in `agent/` to LiveKit Cloud with [`lk agent deploy`](https://docs.livekit.io/agents/ops/deployment/).
 
+To build the app and send it to TestFlight from your browser, use [Expo Launch](https://launch.expo.dev/). Launch builds the repository you give it. Give it your copy of this template, with `origin` set, so the app can reach your token route.
+
+[![Launch with Expo](https://github.com/expo/examples/blob/master/.gh-assets/launch.svg?raw=true)](https://launch.expo.dev/?github=https://github.com/expo/expo-livekit-template)
+
 ## Good to know
 
 - **Echo on a simulator or emulator.** The agent can hear its own voice from your computer's speakers. Mute the microphone while the agent speaks.
