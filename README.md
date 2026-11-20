@@ -27,8 +27,16 @@ https://github.com/user-attachments/assets/b5dcf4f1-5b9c-4337-8cb4-780e0f8d91de
 
 You need Node.js 22.13 or newer, Xcode or Android Studio, and the [LiveKit CLI](https://docs.livekit.io/intro/basics/cli/) with a free [LiveKit Cloud](https://cloud.livekit.io) project.
 
+Create a project from this template:
+
 ```sh
-npm install
+npx create-expo-app@latest my-voice-app --template expo/expo-livekit-template
+cd my-voice-app
+```
+
+Then install the agent and connect your LiveKit Cloud project:
+
+```sh
 npm --prefix agent install
 lk cloud auth
 lk app env -w
